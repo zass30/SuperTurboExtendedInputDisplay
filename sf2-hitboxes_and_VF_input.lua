@@ -983,10 +983,10 @@ while true do
 -- if it's line 1 and input is active, show i-1 nullinputs, and activeinputs	
 
 					if nullinputcounters[player][i] > 0 and i == 1 then
-						gui.text(margin[player] + effective_width - 10, margin[3] + (line-1)*icon_size, "" .. nullinputcounters[player][i], 0x22CCCCFF)
+						gui.text(margin[player] + effective_width - 10, margin[3] + (line-1)*icon_size, "" .. nullinputcounters[player][i], 0xAACCCCFF)
 					elseif i == 1 then
 						if nullinputcounters[player][i+1] and nullinputcounters[player][i+1] > 0 then
-							gui.text(margin[player] + effective_width - 10, margin[3] + (line-1)*icon_size, "" .. nullinputcounters[player][i+1], 0x22CCCCFF)
+							gui.text(margin[player] + effective_width - 10, margin[3] + (line-1)*icon_size, "" .. nullinputcounters[player][i+1], 0xAACCCCFF)
 						end
 						gui.text(margin[player] + effective_width  + 5, margin[3] + (line-1)*icon_size, "" .. activeinputcounters[player][i])						
 
@@ -995,9 +995,9 @@ while true do
 						skip = skip + 1 -- log a skip for an empty input
 					else
 						if nullinputcounters[player][i+1] and nullinputcounters[player][i+1] > 0 then
-							gui.text(margin[player] + effective_width - 10, margin[3] + (line-1-skip)*icon_size, "" .. nullinputcounters[player][i+1], 0x22CCCCFF)
+							gui.text(margin[player] + effective_width - 10, margin[3] + (line-1-skip)*icon_size, "" .. nullinputcounters[player][i+1], 0xAACCCCFF)
 						end
-						gui.text(margin[player] + effective_width  + 5, margin[3] + (line-1-skip)*icon_size, "" .. activeinputcounters[player][i])
+						gui.text(margin[player] + effective_width  + 5, margin[3] + (line-1-skip)*icon_size, "" .. activeinputcounters[player][i], "yellow")
 					end
 
 -- if frameskip, draw something	- this is for debugging
