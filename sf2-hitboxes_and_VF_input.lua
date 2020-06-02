@@ -3,6 +3,7 @@
 -- Original Authors for this Script: Dammit
 -- Homepage: http://code.google.com/p/mame-rr/
 -- requires the Lua gd library (http://luaforge.net/projects/lua-gd/)
+-- updates by Zass
 ----------------------------------------------------------------------------------------------------
 
 --[[
@@ -955,7 +956,7 @@ input.registerhotkey(2, function()
 	toggleplayer()
 end)
 
-print("Expanded input Script") --By zass
+print("Expanded input script by Zass") --By zass
 print("---------------------------------------------------------------------------------")
 print("Lua Hotkey 1: Display/Hide Hitboxes")
 print("Lua Hotkey 2: Display/Hide Scrolling Input")
