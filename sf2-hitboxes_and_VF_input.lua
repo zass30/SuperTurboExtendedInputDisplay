@@ -298,6 +298,9 @@ local function updaterecords(player, frame, input, nullinputcounters, activeinpu
 			end
 		end
 	else
+		if idle[player] == nil then
+			idle[player] = 0
+		end
 		idle[player] = idle[player]+1         --Increment the idle count if nothing changed.
 		if isplayernullinput[player] == true then
 			nullinputcounters[1] = nullinputcounters[1] + 1
