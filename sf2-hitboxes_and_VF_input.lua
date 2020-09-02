@@ -117,7 +117,7 @@ local icon_size, image_icon_size = minimum_tile_size
 local thisframe, lastframe, module, keyset, changed = {}, {}
 local margin, rescale_icons, recording, display, start, effective_width = {}, true, false
 local draw = { [1] = true, [2] = true }
-local inp  = { [1] =   {}, [2] =   {} }
+local allinputcounters  = { [1] =   {}, [2] =   {} }
 local nullinputcounters = { [1] = {[1] = 0}, [2] = {[1] = 0}}  -- counters for null input for player 1 and player 2
 local activeinputcounters = { [1] = {[1] = 0}, [2] = {[1] = 0}}  -- counters for active inputs player 1 and player 2
 local idle = { [1] =    0, [2] =    0 }
@@ -141,6 +141,46 @@ for m, scheme in ipairs(gamekeys) do --Detect what set to use.
 end
 if not module then error("There's no module available for " .. iconfile, 0) end
 if not keyset then error("The '" .. module.set[1] .. "' module isn't prepared for this emulator.", 0) end
+
+-- printing functions
+function table_print (tt, indent, done)
+  done = done or {}
+  indent = indent or 0
+  if type(tt) == "table" then
+    local sb = {}
+    for key, value in pairs (tt) do
+      table.insert(sb, string.rep (" ", indent)) -- indent it
+      if type (value) == "table" and not done [value] then
+        done [value] = true
+        table.insert(sb, key .. " = {\n");
+        table.insert(sb, table_print (value, indent + 2, done))
+        table.insert(sb, string.rep (" ", indent)) -- indent it
+        table.insert(sb, "}\n");
+      elseif "number" == type(key) then
+        table.insert(sb, string.format("\"%s\"\n", tostring(value)))
+      else
+        table.insert(sb, string.format(
+            "%s = \"%s\"\n", tostring (key), tostring(value)))
+       end
+    end
+    return table.concat(sb)
+  else
+    return tt .. "\n"
+  end
+end
+
+function to_string( tbl )
+    if  "nil"       == type( tbl ) then
+        return tostring(nil)
+    elseif  "table" == type( tbl ) then
+        return table_print(tbl)
+    elseif  "string" == type( tbl ) then
+        return tbl
+    else
+        return tostring(tbl)
+    end
+end
+---
 
 --hardcoded check corrects button mapping discrepancy between Tekken 1/2 and Tekken3/TTT
 if mame and emu.sourcename() == "namcos11.c" then
@@ -261,16 +301,34 @@ local function detectchanges(lastframe, thisframe)
 end
 
 -- updated by zass to show counters
-local function updaterecords(player, frame, input, nullinputcounters, activeinputcounters)
-	if changed then                         --If changes were made >
+local function updaterecords(player, frame, nullinputcounters, activeinputcounters)
+--print("player = " .. player)
+if allinputcounters == nil then
+-- 	print("input was nil")
+	allinputcounters = { [1] =   {}, [2] =   {} }
+--	draw = { [1] = true, [2] = true }
+else
+	if allinputcounters[player] == nil then
+--  	print("input player was nil")
+		allinputcounters[player] = {}
+--		draw = { [1] = true, [2] = true }
+	end
+end
+-- print(to_string(allinputcounters))
+ local input = allinputcounters[player]
+-- print(to_string(input))
+
+		if changed then                         --If changes were made >
 			for record = buffersize, 2, -1 do
-				input[record] = input[record-1]   --then shift every old record by 1 >
+				if input ~= nil then
+					input[record] = input[record-1]   --then shift every old record by 1 >
+				end
 				nullinputcounters[record] = nullinputcounters[record-1]   --then shift every old record by 1 >
 				activeinputcounters[record] = activeinputcounters[record-1]   --then shift every old record by 1 >
 			end
 
-		idle[player] = 0                      --Reset the idle count >
-		input[1] = {}                         --and set current input as record 1 >
+			idle[player] = 0                      --Reset the idle count >
+				input[1] = {}                         --and set current input as record 1 >
 		if isplayernullinput[player] == true then
 			nullinputcounters[1] = 1;
 			activeinputcounters[1] = 0;
@@ -291,7 +349,7 @@ local function updaterecords(player, frame, input, nullinputcounters, activeinpu
 		for row, name in ipairs(module) do    --but the order must not deviate from gamekeys.
 			for key, state in pairs(frame) do
 				if key == row then
-					input[1][index] = row
+						input[1][index] = row
 					index = index+1
 					break
 				end
@@ -352,7 +410,7 @@ emu.registerafter(function()
 		filterinput(player, thisframe)
 		compositeinput(thisframe)
 		detectchanges(lastframe[player], thisframe)
-		updaterecords(player, thisframe, inp[player], nullinputcounters[player], activeinputcounters[player])
+		updaterecords(player, thisframe, nullinputcounters[player], activeinputcounters[player])
 		lastframe[player] = thisframe
 
 	end
@@ -976,14 +1034,20 @@ while true do
 
 		--Scrolling Input display
 		for player = 1, 2 do
+--			print("inputd- player " .. player)
+--			print("inputd- draw player " .. to_string(draw[player]))
+			draw[player] = true -- hack for this going to nil after savestate
 			if draw[player] then
 			local i = 0
 			local skip = 0
-				for line in pairs(inp[player]) do
+--							print ("going to draw player " .. player)
+--							print(to_string(allinputcounters[player]))
+				for line in pairs(allinputcounters[player]) do
 				i = i + 1
 
+
 -- if nullinputcounters is nill, set it to 0
-					if nullinputcounters[player][i] == nil then
+--[[					if nullinputcounters[player][i] == nil then
 						nullinputcounters[player][i] = 0
 					end
 					if nullinputcounters[player][i+1] == nil then
@@ -992,10 +1056,10 @@ while true do
 					if activeinputcounters[player][i] == nil then
 						activeinputcounters[player][i] = 0
 					end
-
-
+--]]
 -- if it's line 1 and input is null, just show nullinputs
 -- if it's line 1 and input is active, show i-1 nullinputs, and activeinputs
+
 
 					if nullinputcounters[player][i] > 0 and i == 1 then
 						gui.text(margin[player] + effective_width - 10, margin[3] + (line-1)*icon_size, "" .. nullinputcounters[player][i], 0xAACCCCFF)
@@ -1024,7 +1088,7 @@ while true do
 						gui.text(margin[player] + effective_width + 105, margin[3] + (line-1-skip)*icon_size, "" .. frameskip_prevval, "orange")
 ]]
 -- display inputs, skipping a line for every empty input.
-					for index,row in pairs(inp[player][line]) do
+					for index,row in pairs(allinputcounters[player][line]) do
 						display(margin[player] + (index-1)*effective_width + 30, margin[3] + (line-1-skip)*icon_size, row)
 					end
 
