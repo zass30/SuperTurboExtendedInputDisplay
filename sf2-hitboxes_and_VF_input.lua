@@ -3,7 +3,6 @@
 -- Original Authors for this Script: Dammit
 -- Homepage: http://code.google.com/p/mame-rr/
 -- requires the Lua gd library (http://luaforge.net/projects/lua-gd/)
--- updates by Zass
 ----------------------------------------------------------------------------------------------------
 
 --[[
@@ -119,8 +118,8 @@ local thisframe, lastframe, module, keyset, changed = {}, {}
 local margin, rescale_icons, recording, display, start, effective_width = {}, true, false
 local draw = { [1] = true, [2] = true }
 local inp  = { [1] =   {}, [2] =   {} }
-local nullinputcounters = { [1] = {[1] = 0}, [2] = {[1] = 0}}  -- counters for null input for player 1 and player 2 
-local activeinputcounters = { [1] = {[1] = 0}, [2] = {[1] = 0}}  -- counters for active inputs player 1 and player 2 
+local nullinputcounters = { [1] = {[1] = 0}, [2] = {[1] = 0}}  -- counters for null input for player 1 and player 2
+local activeinputcounters = { [1] = {[1] = 0}, [2] = {[1] = 0}}  -- counters for active inputs player 1 and player 2
 local idle = { [1] =    0, [2] =    0 }
 local isplayernullinput = { [1] = true, [2] = true }
 
@@ -174,7 +173,7 @@ end
 --local str = image:pngStr()
 --local hexdump = string_to_hexdump(str)
 
-local blank_img_hexdump = 
+local blank_img_hexdump =
 "89504E470D0A1A0A0000000D49484452000000400000002001030000009853ECC700000003504C5445000000A77A3DDA00" ..
 
 "00000174524E530040E6D8660000000D49444154189563601805F8000001200001BFC1B1A80000000049454E44AE426082"
@@ -219,7 +218,7 @@ readimages()
 -- update functions
 
 local function filterinput(p, frame)
-    isplayernullinput[p] = true                  
+    isplayernullinput[p] = true
 	for pressed, state in pairs(joypad.getdown(p)) do --Check current controller state >
 		for row, name in pairs(module) do               --but ignore non-gameplay buttons.
 			if pressed == name[keyset]
@@ -244,7 +243,7 @@ local function compositeinput(frame)          --Convert individual directions to
 end
 
 local function detectchanges(lastframe, thisframe)
-    changed = false 
+    changed = false
 	for key, state in pairs(thisframe) do       --If a key is pressed >
 		if lastframe and not lastframe[key] then  --that wasn't pressed last frame >
 			changed = true                          --then changes were made.
@@ -252,7 +251,7 @@ local function detectchanges(lastframe, thisframe)
 		end
 	end
 	if lastframe then                               -- zass: add check for full state change
-		for key, state in pairs(lastframe) do       -- also check that a key last frame 
+		for key, state in pairs(lastframe) do       -- also check that a key last frame
 			if thisframe and not thisframe[key] then  --that wasn't pressed this frame >
 				changed = true                          --then changes were made.
 				break
@@ -269,30 +268,30 @@ local function updaterecords(player, frame, input, nullinputcounters, activeinpu
 				nullinputcounters[record] = nullinputcounters[record-1]   --then shift every old record by 1 >
 				activeinputcounters[record] = activeinputcounters[record-1]   --then shift every old record by 1 >
 			end
-	
+
 		idle[player] = 0                      --Reset the idle count >
 		input[1] = {}                         --and set current input as record 1 >
 		if isplayernullinput[player] == true then
 			nullinputcounters[1] = 1;
 			activeinputcounters[1] = 0;
-			if was_frameskip then 
+			if was_frameskip then
 				nullinputcounters[1] = 2;
 				activeinputcounters[1] = 0;
-			end			
+			end
 		else
 			nullinputcounters[1] = 0;
 			activeinputcounters[1] = 1;
-			if was_frameskip then 
+			if was_frameskip then
 				nullinputcounters[1] = 0;
 				activeinputcounters[1] = 2;
-			end			
-			
+			end
+
 		end
 		local index = 1
 		for row, name in ipairs(module) do    --but the order must not deviate from gamekeys.
 			for key, state in pairs(frame) do
 				if key == row then
-					input[1][index] = row 
+					input[1][index] = row
 					index = index+1
 					break
 				end
@@ -316,11 +315,11 @@ local function updaterecords(player, frame, input, nullinputcounters, activeinpu
 			if activeinputcounters[1] > max_input then
 				activeinputcounters[1] = max_input
 			end
-			if was_frameskip then  
+			if was_frameskip then
 				activeinputcounters[1] = activeinputcounters[1] + 1
 				if activeinputcounters[1] > max_input then
 					activeinputcounters[1] = max_input
-				end			
+				end
 			end
 		end
 	end
@@ -864,7 +863,7 @@ local function draw_axis(obj)
 	if not obj or not obj.pos_x then
 		return
 	end
-	
+
 	gui.drawline(obj.pos_x, obj.pos_y-AXIS_SIZE, obj.pos_x, obj.pos_y+AXIS_SIZE, AXIS_COLOR)
 	gui.drawline(obj.pos_x-AXIS_SIZE, obj.pos_y, obj.pos_x+AXIS_SIZE, obj.pos_y, AXIS_COLOR)
 end
@@ -956,7 +955,7 @@ input.registerhotkey(2, function()
 	toggleplayer()
 end)
 
-print("Expanded input script by Zass") --By zass
+print("Expanded input Script by Zass") --By zass
 print("---------------------------------------------------------------------------------")
 print("Lua Hotkey 1: Display/Hide Hitboxes")
 print("Lua Hotkey 2: Display/Hide Scrolling Input")
@@ -980,8 +979,20 @@ while true do
 				for line in pairs(inp[player]) do
 				i = i + 1
 
+-- if nullinputcounters is nill, set it to 0
+					if nullinputcounters[player][i] == nil then
+						nullinputcounters[player][i] = 0
+					end
+					if nullinputcounters[player][i+1] == nil then
+						nullinputcounters[player][i+1] = 0
+					end
+					if activeinputcounters[player][i] == nil then
+						activeinputcounters[player][i] = 0
+					end
+
+
 -- if it's line 1 and input is null, just show nullinputs
--- if it's line 1 and input is active, show i-1 nullinputs, and activeinputs	
+-- if it's line 1 and input is active, show i-1 nullinputs, and activeinputs
 
 					if nullinputcounters[player][i] > 0 and i == 1 then
 						gui.text(margin[player] + effective_width - 10, margin[3] + (line-1)*icon_size, "" .. nullinputcounters[player][i], 0xAACCCCFF)
@@ -989,9 +1000,9 @@ while true do
 						if nullinputcounters[player][i+1] and nullinputcounters[player][i+1] > 0 then
 							gui.text(margin[player] + effective_width - 10, margin[3] + (line-1)*icon_size, "" .. nullinputcounters[player][i+1], 0xAACCCCFF)
 						end
-						gui.text(margin[player] + effective_width  + 5, margin[3] + (line-1)*icon_size, "" .. activeinputcounters[player][i])						
+						gui.text(margin[player] + effective_width  + 5, margin[3] + (line-1)*icon_size, "" .. activeinputcounters[player][i])
 
--- if it's line 2 or higher						
+-- if it's line 2 or higher
 					elseif activeinputcounters[player][i] == 0 then
 						skip = skip + 1 -- log a skip for an empty input
 					else
@@ -1002,24 +1013,24 @@ while true do
 					end
 
 -- if frameskip, draw something	- this is for debugging
---[[				
+--[[
 					if was_frameskip == true then
 						gui.text(margin[player] + effective_width + 50, margin[3] + (line-1-skip)*icon_size, "fs", "red")
 					end
 						gui.text(margin[player] + effective_width + 85, margin[3] + (line-1-skip)*icon_size, "" .. frameskip_currval, "blue")
 						gui.text(margin[player] + effective_width + 105, margin[3] + (line-1-skip)*icon_size, "" .. frameskip_prevval, "orange")
-]]					
--- display inputs, skipping a line for every empty input.					
+]]
+-- display inputs, skipping a line for every empty input.
 					for index,row in pairs(inp[player][line]) do
 						display(margin[player] + (index-1)*effective_width + 30, margin[3] + (line-1-skip)*icon_size, row)
-					end									
-					
-					
+					end
+
+
 				end
 			end
 		end
 	end)
-	
+
 	--Pause the script until the next frame
-	emu.frameadvance()	
+	emu.frameadvance()
 end
