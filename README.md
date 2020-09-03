@@ -11,8 +11,7 @@ This will get you running training mode with full extended display.
 ### Installing
  * Download the sf2-hitboxes_and_VF_input.lua file, and make sure it's in the same directory as your training mode batch file. 
  * Download the scrolling-input directory, and make sure it's in the same directory as sf2-hitboxes_and_VF_input.lua. 
-
-Move the joystick. You should see
+ * Start the game and move the joystick. You should see inputs scrolling on the side of the display.
 
 ## Troubleshooting
  * **I get an error saying "unexpected symbol near <"** : Make sure you download the lua file as raw.
